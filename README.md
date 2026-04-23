@@ -1,130 +1,130 @@
 # N8N Zalo Workflows
 
-Bộ sưu tập các workflow n8n tự động hóa Zalo cho dự án OTIMO/Cẩm Nang Gối Lò.
+Collection of n8n workflows for Zalo automation for the OTIMO/Cẩm Nang Gối Lò project.
 
-## Tổng Quan
+## Overview
 
-Các workflow này xử lý:
-- Gửi tin nhắn tự động đến nhóm Zalo
-- Quản lý OA (Official Account) Zalo
-- Chatbot AI tự động trả lời
-- Đồng bộ dữ liệu với Google Sheets & Larkbase
-- Tự động kết bạn và chấp nhận lời mời
+These workflows handle:
+- Automated message sending to Zalo groups
+- Zalo Official Account (OA) management
+- AI chatbot for automated responses
+- Data sync with Google Sheets & Larkbase
+- Automatic friend adding and invitation acceptance
 
-## Cấu Trúc Thư Mục
+## Directory Structure
 
 ```
 N8N_Zalo/
-├── Zalo - OA - Tự động lấy Access Token.json    # Làm mới token mỗi 24h
-├── Zalo - OA - Webhook.json                    # Xử lý sự kiện follow/unfollow
-├── Zalo - OA - Lấy thông tin khách hàng.json   # Sync danh sách khách hàng
-├── Zalo - OA - Update thông tin người dùng.json # Cập nhật thông tin định kỳ
-├── Zalo - OA -  Gửi tin nhắn.json               # Gửi tin nhắn OA
-├── Zalo - Gửi Tin Nhắn Tự Động Cho Group CNGL Tài Liệu.json  # Auto post nhóm
-├── Zalo - Gửi Tin Nhắn Video cho Group CNGL.json # Auto post video nhóm
-├── Zalo - Bot Notifications.json                # Chatbot AI
+├── Zalo - OA - Tự động lấy Access Token.json    # Token refresh every 24h
+├── Zalo - OA - Webhook.json                    # Follow/unfollow event handling
+├── Zalo - OA - Lấy thông tin khách hàng.json   # Customer list sync
+├── Zalo - OA - Update thông tin người dùng.json # Periodic user info update
+├── Zalo - OA -  Gửi tin nhắn.json               # OA message sending
+├── Zalo - Gửi Tin Nhắn Tự Động Cho Group CNGL Tài Liệu.json  # Auto post to groups
+├── Zalo - Gửi Tin Nhắn Video cho Group CNGL.json # Auto post videos to groups
+├── Zalo - Bot Notifications.json                # AI chatbot
 ├── Zalo - Tự Động Add & Accept Bạn Bè.json     # Auto friend request
-└── Zalo - Larkbase - Lấy Thông Tin Khách Hàng.json # Sync Larkbase
+└── Zalo - Larkbase - Lấy Thông Tin Khách Hàng.json # Larkbase sync
 ```
 
 ---
 
-## Chi Tiết Workflow
+## Workflow Details
 
-### 1. Zalo - OA - Tự động lấy Access Token
+### 1. Zalo - OA - Auto Token Refresh
 **File:** `Zalo - OA - Tự động lấy Access Token.json`
 
-**Mục đích:** Tự động làm mới access token Zalo OA mỗi 24 giờ.
+**Purpose:** Automatically refresh Zalo OA access token every 24 hours.
 
-**Luồng hoạt động:**
+**Flow:**
 ```
 Schedule Trigger (24h)
     ↓
-Get row(s) từ DataTable "Zalo - Access"
+Get row(s) from DataTable "Zalo - Access"
     ↓
-Limit (lấy item mới nhất)
+Limit (get latest item)
     ↓
-get_access_token_zns (refresh token qua API)
+get_access_token_zns (refresh token via API)
     ↓
-Upsert row(s) (lưu token mới)
+Upsert row(s) (save new token)
 ```
 
-**Điều kiện active:** ✅ Đang bật
+**Status:** ✅ Active
 
 ---
 
 ### 2. Zalo - OA - Webhook
 **File:** `Zalo - OA - Webhook.json`
 
-**Mục đích:** Xử lý sự kiện từ Zalo OA (follow/unfollow/tin nhắn).
+**Purpose:** Handle events from Zalo OA (follow/unfollow/messages).
 
-**Luồng hoạt động:**
+**Flow:**
 ```
-Webhook nhận sự kiện
+Webhook receives event
     ↓
-Switch (phân loại theo event_name)
+Switch (classify by event_name)
     ├── unfollow → Update row (follow=FALSE)
-    ├── follow → Get access_token → Get User Detail → Kiểm tra tồn tại
+    ├── follow → Get access_token → Get User Detail → Check if exists
     │                                     ↓
-    │                          If (chưa có) → Append row
-    │                          If (đã có) → Update row
-    └── Nhắn tin → (route khác)
+    │                          If (new) → Append row
+    │                          If (exists) → Update row
+    └── Message → (route elsewhere)
 ```
 
 **Webhook ID:** `67db90d6-d72c-462a-87b4-5e8df6596430`
 
-**Lưu trữ:** Google Sheets "Khách hàng Zalo OA"
+**Storage:** Google Sheets "Khách hàng Zalo OA"
 
 ---
 
-### 3. Zalo - OA - Lấy thông tin khách hàng
+### 3. Zalo - OA - Get Customer Info
 **File:** `Zalo - OA - Lấy thông tin khách hàng.json`
 
-**Mục đích:** Lấy toàn bộ danh sách khách hàng từ Zalo OA (có pagination).
+**Purpose:** Fetch all customers from Zalo OA (with pagination).
 
-**Luồng hoạt động:**
+**Flow:**
 ```
 Manual Trigger
     ↓
 Get access_token
     ↓
-Get First Page (lấy total count)
+Get First Page (get total count)
     ↓
-Generate Offsets (tính offset: 0, 50, 100, ...)
+Generate Offsets (calculate: 0, 50, 100, ...)
     ↓
 Loop Over Offsets
     ↓
-Get Users Page (mỗi page 50 users)
+Get Users Page (50 users per page)
     ↓
 Split Users
     ↓
-Get User Detail (lấy chi tiết từng user)
+Get User Detail (get each user details)
     ↓
 Code (filter null/error)
     ↓
 Append row in sheet
 ```
 
-**Giới hạn:** 50 users/page
+**Limit:** 50 users/page
 
-**Lưu trữ:** Google Sheets "Khách hàng Zalo OA"
+**Storage:** Google Sheets "Khách hàng Zalo OA"
 
 ---
 
-### 4. Zalo - OA - Update thông tin người dùng
+### 4. Zalo - OA - Update User Info
 **File:** `Zalo - OA - Update thông tin người dùng.json`
 
-**Mục đích:** Cập nhật thông tin khách hàng từ form submissions vào Zalo OA.
+**Purpose:** Update customer info from form submissions to Zalo OA.
 
-**Luồng hoạt động:**
+**Flow:**
 ```
-Schedule Trigger (30 phút)
+Schedule Trigger (30 minutes)
     ↓
-Get row(s) từ sheet "Christmas Form Submit 2025"
+Get row(s) from sheet "Christmas Form Submit 2025"
     ↓
-If2 (lọc: chưa update + đã gửi form 2 + có tag "đk phần 2")
+If2 (filter: not updated + form 2 sent + tag "đk phần 2")
     ↓
-If3 (lọc: gửi form 2 + chưa có Ngày nhận full)
+If3 (filter: form 2 sent + no "Full Received Date")
     ↓
 Loop Over Items
     ↓
@@ -132,60 +132,60 @@ Get access_token
     ↓
 Get User Detail2
     ↓
-Wait (chờ)
+Wait
     ↓
-HTTP Request (update user info lên Zalo)
+HTTP Request (update user info on Zalo)
     ↓
 Append or update row in sheet
     ↓
-Update row (đánh dấu "Đã update")
+Update row (mark "Updated")
 ```
 
-**Điều kiện active:** ✅ Đang bật
+**Status:** ✅ Active
 
 ---
 
-### 5. Zalo - OA - Gửi tin nhắn
+### 5. Zalo - OA - Send Message
 **File:** `Zalo - OA -  Gửi tin nhắn.json`
 
-**Mục đích:** Gửi các loại tin nhắn đến khách hàng Zalo OA.
+**Purpose:** Send various message types to Zalo OA customers.
 
-**Được gọi từ:** `Zalo - OA - Webhook.json`
+**Called from:** `Zalo - OA - Webhook.json`
 
-**Loại tin nhắn hỗ trợ:**
+**Supported message types:**
 - Text message
 - Template (generic, media)
 - Promotion template
 - Transaction template
 
-**Các endpoint API:**
+**API endpoints:**
 - `https://openapi.zalo.me/v2.0/oa/message`
 - `https://openapi.zalo.me/v3.0/oa/message/cs`
 - `https://openapi.zalo.me/v3.0/oa/message/promotion`
 - `https://openapi.zalo.me/v3.0/oa/message/transaction`
 
-**Điều kiện active:** ✅ Đang bật
+**Status:** ✅ Active
 
 ---
 
-### 6. Zalo - Gửi Tin Nhắn Tự Động Cho Group CNGL Tài Liệu
+### 6. Zalo - Auto Send Messages to CNGL Documents Group
 **File:** `Zalo - Gửi Tin Nhắn Tự Động Cho Group CNGL Tài Liệu.json`
 
-**Mục đích:** Tự động đăng bài viết từ Google Sheets lên 2 nhóm Zalo.
+**Purpose:** Automatically post articles from Google Sheets to 2 Zalo groups.
 
-**Nhóm đích:**
-- Group Tài Liệu: `3805678902304196474`
-- Group Trung Thu: `4704866323941501409`
+**Target groups:**
+- Documents Group: `3805678902304196474`
+- Mid-Autumn Group: `4704866323941501409`
 
-**Luồng hoạt động:**
+**Flow:**
 ```
-Schedule Trigger (12:30 hàng ngày)
+Schedule Trigger (12:30 daily)
     ↓
-Lấy bài viết từ Google Sheets
+Fetch articles from Google Sheets
     ↓
-Limit (lấy bài mới nhất)
+Limit (get latest article)
     ↓
-If (kiểm tra "Trạng thái đăng Zalo")
+If (check "Zalo Post Status")
     ↓ (FALSE)
 HTTP Request (download image)
     ↓
@@ -193,47 +193,46 @@ Read/Write Files from Disk
     ↓
 Code (split text @ 480 words)
     ↓
-├── tài liệu (gửi text + ảnh vào group Tài Liệu)
-├── tài liệu1 (gửi phần còn lại text)
-├── trung thu (gửi text + ảnh vào group Trung Thu)
-├── trung thu1 (gửi phần còn lại text)
+├── tài liệu (send text + image to Documents Group)
+├── tài liệu1 (send remaining text)
+├── trung thu (send text + image to Mid-Autumn Group)
+├── trung thu1 (send remaining text)
     ↓
-Update row in sheet (đánh dấu "Đã đăng")
+Update row in sheet (mark "Posted")
 ```
 
-**Điều kiện active:** ✅ Đang bật
-<img width="1027" height="716" alt="Screenshot 2026-04-23 at 14 34 22" src="https://github.com/user-attachments/assets/d56f6597-77eb-42ca-8652-bb4d5fec2ed9" />
+**Status:** ✅ Active
 
 ---
 
-### 7. Zalo - Gửi Tin Nhắn Video cho Group CNGL
+### 7. Zalo - Send Video Messages to CNGL Group
 **File:** `Zalo - Gửi Tin Nhắn Video cho Group CNGL.json`
 
-**Mục đích:** Tương tự workflow #6 nhưng dành cho video content.
+**Purpose:** Similar to workflow #6 but for video content.
 
-**Luồng hoạt động:**
+**Flow:**
 ```
-Schedule Trigger (12:30 hàng ngày)
+Schedule Trigger (12:30 daily)
     ↓
-Lấy bài viết từ Google Sheets
+Fetch articles from Google Sheets
     ↓
 Limit
     ↓
-If (kiểm tra đã đăng chưa)
+If (check if already posted)
     ↓ (FALSE)
 HTTP Request (download image)
     ↓
-Image Format Converter (chuyển sang PNG)
+Image Format Converter (convert to PNG)
     ↓
 Edit Fields
     ↓
-Upload a file (lên Cloudflare R2)
+Upload a file (to Cloudflare R2)
     ↓
 Code (split text @ 480 words)
     ↓
-├── tài liệu (gửi text + imageUrl vào group)
-├── tài liệu1 (gửi phần còn lại text)
-├── trung thu, trung thu1 (tương tự)
+├── tài liệu (send text + imageUrl to group)
+├── tài liệu1 (send remaining text)
+├── trung thu, trung thu1 (similar)
     ↓
 Update row in sheet
 ```
@@ -243,17 +242,17 @@ Update row in sheet
 ### 8. Zalo - Bot Notifications
 **File:** `Zalo - Bot Notifications.json`
 
-**Mục đích:** Chatbot AI tự động trả lời tin nhắn Telegram-like bot.
+**Purpose:** AI chatbot that automatically replies to messages (Telegram-like bot).
 
-**Luồng hoạt động:**
+**Flow:**
 ```
-Webhook nhận tin nhắn
+Webhook receives message
     ↓
 AI Agent (Gemini)
     ↓
-HTTP Request3 (gửi typing indicator)
+HTTP Request3 (send typing indicator)
     ↓
-HTTP Request2 (gửi reply)
+HTTP Request2 (send reply)
 ```
 
 **Bot API:** `https://bot-api.zapps.me/bot1373614001553898373:rYZxMjpkiUmAlakyeOiQeBHFFnXcfNvTanWDzrlpWCROciXiQSIzvnAYtaTPYXrT`
@@ -264,40 +263,40 @@ HTTP Request2 (gửi reply)
 
 ---
 
-### 9. Zalo - Tự Động Add & Accept Bạn Bè
+### 9. Zalo - Auto Add & Accept Friends
 **File:** `Zalo - Tự Động Add & Accept Bạn Bè.json`
 
-**Mục đích:** Xử lý tự động friend request và chatbot AI hướng dẫn tham gia group.
+**Purpose:** Handle automatic friend requests and AI chatbot guiding users to join groups.
 
-**Luồng hoạt động:**
+**Flow:**
 ```
 Zalo Event Trigger (message, friend_event, group_event)
     ↓
-Lấy thông tin người dùng
+Get user info
     ↓
-Switch1 (phân loại)
-    ├── Người dùng kết bạn → Kiểm tra trạng thái
-    │                       ├── Chưa kết bạn → Gửi lời mời kết bạn
-    │                       └── Đã là bạn bè → AI Agent
-    └── Người dùng nhắn tin → Chấp nhận lời mời kết bạn → AI Agent
+Switch1 (classify)
+    ├── User adds friend → Check status
+    │                       ├── Not friends → Send friend request
+    │                       └── Already friends → AI Agent
+    └── User messages → Accept friend request → AI Agent
                                               ↓
                                       AI Agent (Gemini)
                                               ↓
-                                    Zalo Gửi tin nhắn
+                                    Zalo Send message
 ```
 
-**AI Agent prompts:** Hướng dẫn người dùng tham gia 2 group:
-- Tài Liệu Ngành Bánh: https://zalo.me/g/ujerqq444
-- Chia Sẻ Kiến Thức Làm Bánh Trung Thu: https://zalo.me/g/szigxh684
+**AI Agent prompts:** Guide users to join 2 groups:
+- Documents Group: https://zalo.me/g/ujerqq444
+- Mid-Autumn Knowledge Sharing: https://zalo.me/g/szigxh684
 
 ---
 
-### 10. Zalo - Larkbase - Lấy Thông Tin Khách Hàng
+### 10. Zalo - Larkbase - Get Customer Info
 **File:** `Zalo - Larkbase - Lấy Thông Tin Khách Hàng Từ Group CNGLTài Liệu.json`
 
-**Mục đích:** Lấy thông tin thành viên từ nhóm Zalo và lưu vào Larkbase.
+**Purpose:** Fetch member info from Zalo group and save to Larkbase.
 
-**Luồng hoạt động:**
+**Flow:**
 ```
 Manual Trigger
     ↓
@@ -305,30 +304,30 @@ Input (app_id, app_secret, table_id, sheet_id)
     ↓
 Get Lark Token
     ↓
-Lấy thông tin nhóm (groupId: 3805678902304196474)
+Get group info (groupId: 3805678902304196474)
     ↓
-Split Out (tách memVerList)
+Split Out (split memVerList)
     ↓
 Code in JavaScript (slice: items 0-100)
     ↓
-Lấy thông tin người dùng (theo userId)
+Get user info (by userId)
     ↓
 Split Out1
     ↓
-HTTP Request (tạo record trong Larkbase)
+HTTP Request (create record in Larkbase)
 ```
 
-**Lưu ý:**
-- Giới hạn ~180 người/ngày
-- Giới hạn ~50 records/lần
+**Note:**
+- Limit ~180 people/day
+- Limit ~50 records/batch
 
 ---
 
 ## External Integrations
 
 ### Google Sheets
-- **TỔNG HỢP BÀI VIẾT TRÊN FANPAGE** - Nguồn bài viết đăng Zalo
-- **Khách hàng Zalo OA** - Lưu thông tin khách hàng
+- **TỔNG HỢP BÀI VIẾT TRÊN FANPAGE** - Source for Zalo posts
+- **Khách hàng Zalo OA** - Customer info storage
 
 ### Larkbase (Larksuite)
 - **app_id:** `cli_a8746eb09c395ed4`
@@ -337,7 +336,7 @@ HTTP Request (tạo record trong Larkbase)
 
 ### Cloudflare R2
 - Bucket: `otimo`
-- Dùng cho workflow #7 (upload hình ảnh)
+- Used for workflow #7 (image upload)
 
 ### Zalo API Credentials
 - **Zalo API** - `ZNGzItbJ2er3g4Pv` (Lam Tuyền)
@@ -345,26 +344,26 @@ HTTP Request (tạo record trong Larkbase)
 
 ---
 
-## Triển Khai
+## Deployment
 
-1. Import các file `.json` vào n8n instance
-2. Cấu hình credentials cho:
+1. Import `.json` files into n8n instance
+2. Configure credentials for:
    - Google Sheets OAuth2 (`Lamtuyen account`)
    - Zalo API (`Lam Tuyền 05-11-2025 14:55`, etc.)
    - Google Gemini (`Google Gemini - Tân`)
    - Cloudflare R2 (`Cloudflare R2 Storage account`)
-3. Cập nhật các hardcoded values:
+3. Update hardcoded values:
    - Group IDs
    - DataTable IDs
    - Document IDs
-   - API endpoints/credentials nếu thay đổi
-4. Kích hoạt các workflow theo nhu cầu
+   - API endpoints/credentials if changed
+4. Enable workflows as needed
 
 ---
 
-## Lưu Ý Quan Trọng
+## Important Notes
 
-- **Credentials:** Các credential IDs trong JSON là reference, cần tạo credentials mới phù hợp với instance của bạn
-- **Hardcoded IDs:** Nhiều workflow chứa IDs cứng (group IDs, sheet IDs, user IDs) - cần điều chỉnh
-- **Rate Limits:** Workflow #10 có giới hạn ~180 người/ngày và ~50 records/lần
-- **Schedule:** Workflow #1, #4, #6, #7 chạy tự động theo lịch
+- **Credentials:** Credential IDs in JSON are references; you need to create new credentials suitable for your instance
+- **Hardcoded IDs:** Many workflows contain hardcoded IDs (group IDs, sheet IDs, user IDs) - adjust as needed
+- **Rate Limits:** Workflow #10 has limits of ~180 people/day and ~50 records/batch
+- **Schedule:** Workflows #1, #4, #6, #7 run automatically on schedule
