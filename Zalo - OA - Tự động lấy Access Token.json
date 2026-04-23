@@ -1,0 +1,201 @@
+{
+  "name": "Zalo - OA - Tự động lấy Access Token",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://oauth.zaloapp.com/v4/oa/access_token?grant_type=refresh_token&app_id=964576516721822117&refresh_token={{ $json.refresh_token }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n\"Content-Type\": \"application/x-www-form-urlencoded\",\n\"secret_key\": \"nkRW5JNR1RdIeo4EF633\" \n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "ccfb72a7-bde2-4321-90ea-bf62320c3ea1",
+      "name": "get_access_token_zns",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        768,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        128,
+        144
+      ],
+      "id": "ed8d5ece-3c1c-4bb5-a1bb-71a6486c351e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "WZTalOMZazEDVaD4",
+          "mode": "list",
+          "cachedResultName": "Zalo - Access",
+          "cachedResultUrl": "/projects/yBT9VjklbcIIfxSf/datatables/WZTalOMZazEDVaD4"
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        320,
+        144
+      ],
+      "id": "25bb7f50-3ad6-47f2-a6c6-ec421a44209b",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "keep": "lastItems"
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        544,
+        144
+      ],
+      "id": "2a7b726b-2027-4a0c-b930-8b9c67182cfb",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "WZTalOMZazEDVaD4",
+          "mode": "list",
+          "cachedResultName": "Zalo - Access",
+          "cachedResultUrl": "/projects/yBT9VjklbcIIfxSf/datatables/WZTalOMZazEDVaD4"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "1"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "access_token": "={{ $json.access_token }}",
+            "refresh_token": "={{ $json.refresh_token }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "access_token",
+              "displayName": "access_token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "refresh_token",
+              "displayName": "refresh_token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        992,
+        144
+      ],
+      "id": "94c948f8-0c93-46ae-b705-544cb91379f0",
+      "name": "Upsert row(s)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "get_access_token_zns": {
+      "main": [
+        [
+          {
+            "node": "Upsert row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "get_access_token_zns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c6a0479b-b8eb-4125-8eef-d326b2e53883",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df75f6d19da9532b87ea5a84541b4ccc1d0dd5baf896242962b0dfcbc492bcf4"
+  },
+  "id": "BA2ILpIIgIFf2TAI",
+  "tags": []
+}

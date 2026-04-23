@@ -1,0 +1,795 @@
+{
+  "name": "Zalo - OA - Update thông tin người dùng",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        48
+      ],
+      "id": "eae243ca-ab3d-405d-96db-8ab7ccf7b650",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openapi.zalo.me/v3.0/oa/user/update",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Get row(s)').item.json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"user_id\": \"{{ $('Get User Detail2').item.json.data.user_id }}\",\n    \"shared_info\": {\n        \"name\": \"{{ $('Get User Detail2').item.json.data.display_name }}\",\n            \"phone\": \"{{ $('Loop Over Items').item.json.SDT }}\",\n            \"address\":\"{{ $('Loop Over Items').item.json['Tỉnh thành'] }}\"\n    },\n    \"user_alias\": \"{{ $('Get User Detail2').item.json.data.user_alias }}\"\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1888,
+        -32
+      ],
+      "id": "7e3de464-c892-43ad-bc34-9c73c19b00d7",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig",
+          "mode": "list",
+          "cachedResultName": "Khách hàng Zalo OA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 686175094,
+          "mode": "list",
+          "cachedResultName": "Christmas Form Submit 2025",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit#gid=686175094"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        128,
+        48
+      ],
+      "id": "f44a76f6-d7a0-4fd0-9a78-c5f5e15b669d",
+      "name": "Get row(s) in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T4BIlZq3O0X4Tg2N",
+          "name": "Lamtuyen account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        784,
+        48
+      ],
+      "id": "8c9a9777-4b25-4fad-a219-5d4091793028",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "https://openapi.zalo.me/v3.0/oa/user/detail",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={\"user_id\":\"{{ $('Loop Over Items').item.json.User_id_OA }}\"}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $json.access_token }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1232,
+        -32
+      ],
+      "id": "5ce54a67-4bb9-4cc8-a111-b8af6d3a73bd",
+      "name": "Get User Detail2"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig",
+          "mode": "list",
+          "cachedResultName": "Khách hàng Zalo OA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Thông tin khách hàng",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "User_id_by_app": "={{ $json.data.user_id_by_app }}",
+            "User_name": "={{ $json.data.display_name }}",
+            "User_alias": "={{ $json.data.user_alias }}",
+            "sensetive": "={{ $json.data.is_sensitive }}",
+            "follow": "={{ $json.data.user_is_follower }}",
+            "user_last_interaction_date": "={{ $json.data.user_last_interaction_date }}",
+            "Tag": "={{ $json.data.tags_and_notes_info.tag_names.join(',') }}",
+            "SDT": "={{ $('Get row(s) in sheet2').item.json.SDT }}",
+            "User_id_CNV": "={{ $('Get row(s) in sheet2').item.json.User_id_CNV }}",
+            "User_id_OA": "={{ $('Loop Over Items').item.json.User_id_OA }}",
+            "Tỉnh thành": "={{ $('Get row(s) in sheet2').item.json['Tỉnh thành'] }}"
+          },
+          "matchingColumns": [
+            "User_id_OA"
+          ],
+          "schema": [
+            {
+              "id": "User_id_OA",
+              "displayName": "User_id_OA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "User_id_by_app",
+              "displayName": "User_id_by_app",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "User_id_CNV",
+              "displayName": "User_id_CNV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "User_name",
+              "displayName": "User_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "User_alias",
+              "displayName": "User_alias",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow",
+              "displayName": "follow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sensetive",
+              "displayName": "sensetive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "user_last_interaction_date",
+              "displayName": "user_last_interaction_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SDT",
+              "displayName": "SDT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tỉnh thành",
+              "displayName": "Tỉnh thành",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1664,
+        -32
+      ],
+      "id": "95759db5-42bd-481d-8564-8b32659a4475",
+      "name": "Append or update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T4BIlZq3O0X4Tg2N",
+          "name": "Lamtuyen account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Lấy thông tin người dùng\n",
+        "height": 336,
+        "width": 166,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        768,
+        -208
+      ],
+      "id": "e91a12f5-19d3-42d0-949a-ca7322b6690e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Lưu lại thông tin người dùng\n\n",
+        "height": 336,
+        "width": 166,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        992,
+        -208
+      ],
+      "id": "2c76ffb0-8e4d-4bbe-a781-aace0d12cffe",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig",
+          "mode": "list",
+          "cachedResultName": "Khách hàng Zalo OA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 686175094,
+          "mode": "list",
+          "cachedResultName": "Christmas Form Submit 2025",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit#gid=686175094"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "User_id_OA": "={{ $('Loop Over Items').item.json.User_id_OA }}",
+            "Update thông tin": "Đã update",
+            "Tags": "={{ $('Get User Detail2').item.json.data.tags_and_notes_info.tag_names.join(',') }}"
+          },
+          "matchingColumns": [
+            "User_id_OA"
+          ],
+          "schema": [
+            {
+              "id": "User_id_OA",
+              "displayName": "User_id_OA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "User_id_CNV",
+              "displayName": "User_id_CNV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "User_name",
+              "displayName": "User_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tags",
+              "displayName": "Tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Hiện đang làm",
+              "displayName": "Hiện đang làm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Làm loại bánh khác",
+              "displayName": "Làm loại bánh khác",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phương pháp học",
+              "displayName": "Phương pháp học",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Kiến thức bổ sung",
+              "displayName": "Kiến thức bổ sung",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SDT",
+              "displayName": "SDT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Ngày nhận lần 1",
+              "displayName": "Ngày nhận lần 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Ngày nhận full",
+              "displayName": "Ngày nhận full",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tỉnh thành",
+              "displayName": "Tỉnh thành",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Số ngày còn lại",
+              "displayName": "Số ngày còn lại",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Update thông tin",
+              "displayName": "Update thông tin",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2112,
+        48
+      ],
+      "id": "111a4db4-d5a3-4c3f-ad5c-4ad20608924c",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T4BIlZq3O0X4Tg2N",
+          "name": "Lamtuyen account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "WZTalOMZazEDVaD4",
+          "mode": "list",
+          "cachedResultName": "Zalo - Access",
+          "cachedResultUrl": "/projects/yBT9VjklbcIIfxSf/datatables/WZTalOMZazEDVaD4"
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        -32
+      ],
+      "id": "8731e2e5-dc0f-4bef-b467-d313ee40701f",
+      "name": "Get row(s)",
+      "executeOnce": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1440,
+        -32
+      ],
+      "id": "307f6809-1ee2-4135-91f4-e37748c4685f",
+      "name": "Wait",
+      "webhookId": "e87b0254-97a7-4e10-bdf9-4dc07a03b9ce"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9f272af0-e1cf-4bd6-90d0-a8fd9149e724",
+              "leftValue": "={{ $json['Update thông tin'] }}",
+              "rightValue": "Đã update",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "6cbe3441-14f7-4cb3-847a-2814e8819fcf",
+              "leftValue": "={{ $json['Số ngày còn lại'] }}",
+              "rightValue": "đã gửi form 2",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "a6c0cc25-1cbb-4b51-8147-1d7fb13fb556",
+              "leftValue": "={{ $json.Tags }}",
+              "rightValue": "đk phần 2",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        32
+      ],
+      "id": "aa57ac5c-897c-4b34-8765-eaad381dd22b",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8938c384-4e4b-4572-9b98-15592a4a7235",
+              "leftValue": "={{ $json['Số ngày còn lại'] }}",
+              "rightValue": "gửi form 2",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "b499838f-8f94-4074-8063-688cd5277afc",
+              "leftValue": "={{ $json['Ngày nhận full'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        48
+      ],
+      "id": "66aaead2-b5aa-4e34-a29c-92b93303246a",
+      "name": "If3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Detail2": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Get User Detail2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7c8127c1-1999-466b-bae6-9a7860af4e90",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df75f6d19da9532b87ea5a84541b4ccc1d0dd5baf896242962b0dfcbc492bcf4"
+  },
+  "id": "pRvvofuw7ql4h6vd",
+  "tags": []
+}

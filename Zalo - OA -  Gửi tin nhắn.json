@@ -1,0 +1,262 @@
+{
+  "name": "Zalo - OA -  Gửi tin nhắn",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -144,
+        0
+      ],
+      "id": "93f0a0e7-97e1-4424-8fdd-e0d464e43b92",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "WZTalOMZazEDVaD4",
+          "mode": "list",
+          "cachedResultName": "Zalo - Access",
+          "cachedResultUrl": "/projects/yBT9VjklbcIIfxSf/datatables/WZTalOMZazEDVaD4"
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        112,
+        0
+      ],
+      "id": "f4d5669c-b777-4504-a5a3-d9855eac4297",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openapi.zalo.me/v2.0/oa/message",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"recipient\": {\n    \"user_id\": \"3253311580624873866\"\n  },\n  \"message\": {\n    \"attachment\": {\n      \"type\": \"template\",\n      \"payload\": {\n        \"template_type\": \"generic\",\n        \"elements\": [\n          {\n            \"title\": \"Xem ngay các mẫu hot nhất\",\n            \"subtitle\": \"Giá chỉ từ 299k - Freeship toàn quốc\",\n            \"image_url\": \"https://via.placeholder.com/640x360/FF6B6B/FFFFFF?text=Hot+Sale\",\n            \"buttons\": [\n              {\n                \"type\": \"oa.open.url\",\n                \"title\": \"Xem ngay\",\n                \"url\": \"https://zalo.me/s/1234567890/hot-sale\"\n              }\n            ]\n          }\n        ]\n      }\n    }\n  }\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        400,
+        -144
+      ],
+      "id": "10b93b23-f347-4ee9-9023-dbf7c1312c62",
+      "name": "Gửi tin nhắn1"
+    },
+    {
+      "parameters": {
+        "url": "https://otimo.openapi.zalo.me/template/all?offset=0&limit=100&status=2",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        -192
+      ],
+      "id": "c62acb49-957d-4390-b44d-b0d782cf7b4e",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openapi.zalo.me/v3.0/oa/message/cs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"recipient\": {\n    \"user_id\": \"3253311580624873866\"\n  },\n  \"message\": {\n    \"attachment\": {\n      \"type\": \"template\",\n      \"payload\": {\n        \"template_type\": \"media\",\n        \"elements\": [\n          {\n            \"media_type\": \"image\",\n            \"url\": \"https://otimo.vn/wp-content/uploads/2025/11/20251128-084856.jpeg\",\n            \"title\": \"25 Công Thức Cookies Christmas\",\n            \"subtitle\": \"Bản dịch tiếng Việt\",\n            \"buttons\": [\n             {\n            \"title\": \"Xem eBook - phần 1\",\n            \"image_url\": \"https://cdn-icons-png.flaticon.com/512/11441/11441308.png\",\n            \"type\": \"oa.open.url\",\n            \"payload\": {\n              \"url\": \"https://otimo.vn/blogs/icing-sugar-dung-khi-nao-vi-sao-dung-va-nhung-luu-y-chuyen-mon/\"\n            }\n          },\n              {\n                \"title\": \"Đăng ký xem Phần 2\",\n                \"type\": \"oa.open.url\",\n                \"payload\": {\n                  \"url\": \"https://your-domain.com/dang-ky-xem-phan-2\"\n                }\n              }\n            ]\n          }\n        ]\n      }\n    }\n  }\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        112,
+        -336
+      ],
+      "id": "cc59ee59-632a-4256-9898-5b3fead3b98d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"recipient\": {\n    \"user_id\": \"3253311580624873866\"\n  },\n  \"message\": {\n    \"text\": \"Chào anh/chị! Em là tư vấn viên của Shop XYZ đây ạ 🌟\\n\\nAnh/chị đang quan tâm sản phẩm nào ạ?\\nEm hỗ trợ tư vấn miễn phí và báo giá tốt nhất hôm nay nhé!\",\n    \"attachment\": {\n      \"type\": \"template\",\n      \"payload\": {\n        \"template_type\": \"generic\",\n        \"elements\": [\n          {\n            \"title\": \"Xem ngay các mẫu hot nhất\",\n            \"subtitle\": \"Giá chỉ từ 299k - Freeship toàn quốc\",\n            \"image_url\": \"https://example.com/banner-sale.jpg\",\n            \"buttons\": [\n              {\n                \"type\": \"oa.open.url\",\n                \"title\": \"Xem sản phẩm\",\n                \"url\": \"https://zalo.me/s/1234567890/hot-sale\",\n                \"payload\": {}\n              }\n            ]\n          }\n        ]\n      }\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        -320
+      ],
+      "id": "843a41ec-2614-45b8-8cd2-011d03e05425",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openapi.zalo.me/v3.0/oa/message/promotion",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "=access_token",
+              "value": "={{ $json.access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"user_id\": \"2115912657586168561\"\n  },\n  \"message\": {\n    \"attachment\": {\n      \"type\": \"template\",\n      \"payload\": {\n        \"template_type\": \"promotion\",\n        \"elements\": [\n          {\n            \"image_url\": \"https://pub-6b971cacd26844729a8b9e299aa3ec3d.r2.dev/images/574624255_854123976964624_6310868508954161708.png\",\n            \"type\": \"banner\"\n          },\n          {\n            \"type\": \"header\",\n            \"content\": \"🎄 TẶNG MIỄN PHÍ EBOOK: 25 CÔNG THỨC CHRISTMAS COOKIES CHUẨN VỊ ÂU\"\n          },\n          {\n            \"type\": \"text\",\n            \"align\": \"left\",\n            \"content\": \"🎉 Cảm ơn bạn đã đăng ký! OTIMO gửi tặng bạn trước Phần 1 của Ebook để.💡 NHƯNG CHỜ ĐÃ! Bản FULL (122 trang) còn hấp dẫn hơn nhiều với các kỹ thuật cốt lõi chuyên sâu và nhiều mẫu bánh trang trí độc đáo chưa từng tiết lộ. Bạn có muốn nhận trọn bộ không?\"\n          }\n        ],\n        \"buttons\": [\n          {\n            \"title\": \"Xem eBook - phần 1\",\n            \"image_icon\": \"https://cdn-icons-png.flaticon.com/512/11441/11441308.png\",\n            \"type\": \"oa.open.url\",\n            \"payload\": {\n              \"url\": \"https://otimo.vn/blogs/icing-sugar-dung-khi-nao-vi-sao-dung-va-nhung-luu-y-chuyen-mon/\"\n            }\n          },\n          {\n            \"title\": \"Đăng ký phần 2\",\n            \"image_icon\": \"https://cdn-icons-png.flaticon.com/512/14018/14018622.png\",\n            \"type\": \"oa.query.show\",\n            \"payload\": \"#callback_data\"\n          }\n        ]\n      }\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -80,
+        -192
+      ],
+      "id": "387a0c1f-b8fd-438c-badf-89916ecabffc",
+      "name": "Gửi tin nhắn truyền thông"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openapi.zalo.me/v3.0/oa/message/transaction",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $json.access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"recipient\": {\n    \"user_id\": \"2115912657586168561\"\n  },\n  \"message\": {\n    \"attachment\": {\n      \"type\": \"template\",\n      \"payload\": {\n        \"template_type\": \"request_user_info\",\n        \"buttons\": [\n          {\n            \"title\": \"Xem eBook - phần 1\",\n            \"image_icon\": \"https://cdn-icons-png.flaticon.com/512/11441/11441308.png\",\n            \"type\": \"oa.open.url\",\n            \"payload\": {\n              \"url\": \"https://otimo.vn/blogs/icing-sugar-dung-khi-nao-vi-sao-dung-va-nhung-luu-y-chuyen-mon/\"\n            }\n          },\n          {\n            \"title\": \"Đăng ký phần 2\",\n            \"image_icon\": \"https://cdn-icons-png.flaticon.com/512/14018/14018622.png\",\n            \"type\": \"oa.query.show\",\n            \"payload\": \"#callback_data\"\n          }\n        ]\n      }\n    }\n  }\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        368,
+        -368
+      ],
+      "id": "d29ed67f-7a8b-4223-8a33-7792b6aa2092",
+      "name": "Gửi tin nhắn giao dịch"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.otimo.vn",
+            "x-real-ip": "49.213.78.6",
+            "x-forwarded-for": "49.213.78.6",
+            "x-forwarded-proto": "https",
+            "connection": "Upgrade",
+            "content-length": "172",
+            "content-type": "application/json",
+            "user-agent": "ZaloWebhook",
+            "x-zevent-server": "OA OpenAPI",
+            "x-zevent-signature": "mac=e485d77894401c2f214db32e8d7bca1232785224371349c5f82c98bb1f71e858"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "oa_id": "874534891260076964",
+            "follower": {
+              "id": "7753894468512322103"
+            },
+            "event_name": "follow",
+            "source": "oa_profile",
+            "app_id": "964576516721822117",
+            "timestamp": "1764058084840"
+          },
+          "webhookUrl": "https://n8n.otimo.vn/webhook/67db90d6-d72c-462a-87b4-5e8df6596430",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "76d31f79-5d45-403a-bb10-46d1391bd6c0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df75f6d19da9532b87ea5a84541b4ccc1d0dd5baf896242962b0dfcbc492bcf4"
+  },
+  "id": "6pSZ9sHqsg8AvCLt",
+  "tags": []
+}

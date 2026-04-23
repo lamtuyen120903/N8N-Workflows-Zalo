@@ -1,0 +1,497 @@
+{
+  "name": "Zalo - OA - Lấy thông tin khách hàng",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -544
+      ],
+      "id": "611dd69a-ea33-42b8-a90e-80fc8c388afe",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "WZTalOMZazEDVaD4",
+          "mode": "list",
+          "cachedResultName": "Zalo - Access",
+          "cachedResultUrl": "/projects/yBT9VjklbcIIfxSf/datatables/WZTalOMZazEDVaD4"
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -544
+      ],
+      "id": "f5908fc2-c275-432e-befb-b5d3e63b09b4",
+      "name": "Get access_token"
+    },
+    {
+      "parameters": {
+        "url": "https://openapi.zalo.me/v3.0/oa/user/getlist",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={\"offset\":0,\"count\":50}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $json.access_token }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        384,
+        -544
+      ],
+      "id": "5ff5af30-6c6d-4789-a5b2-8f3a5cf295de",
+      "name": "Get First Page (for total)",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        832,
+        -544
+      ],
+      "id": "1ce54d9d-4f0d-4675-bc22-7788aac7eea7",
+      "name": "Loop Over Offsets"
+    },
+    {
+      "parameters": {
+        "url": "https://openapi.zalo.me/v3.0/oa/user/getlist",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={\"offset\":{{ $json.offset }},\"count\":50}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Get access_token').item.json.access_token }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1072,
+        -528
+      ],
+      "id": "0e0b9680-8384-4915-8f91-4596ae8937fa",
+      "name": "Get Users Page"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data.users",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        -528
+      ],
+      "id": "ca6bc7ba-a106-40c1-b780-4171d8e27e91",
+      "name": "Split Users"
+    },
+    {
+      "parameters": {
+        "url": "https://openapi.zalo.me/v3.0/oa/user/detail",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={\"user_id\":\"{{ $json.user_id }}\"}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Get access_token').item.json.access_token }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1520,
+        -528
+      ],
+      "id": "fafa4eb6-b9be-4280-8811-c7ee4f6a7aaf",
+      "name": "Get User Detail"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "End Loop",
+      "typeVersion": 1,
+      "position": [
+        2128,
+        -528
+      ],
+      "id": "bd401866-5745-46d9-8f99-a77d0c7e3610"
+    },
+    {
+      "parameters": {
+        "content": "## Pagination tự động: offset = 0,50,100,... dựa trên total",
+        "height": 272,
+        "width": 200
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -688
+      ],
+      "id": "24de28b1-1720-4a7f-9c10-5f14342ece17",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const limit = 50;\nconst total = $('Get First Page (for total)').first().json.data.total;\nconst pages = Math.ceil(total / limit);\n\nreturn Array.from({length: pages}, (_, i) => ({\n  json: {\n    offset: i * limit,\n    limit: limit,\n    page: i + 1\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        -544
+      ],
+      "id": "e1642b30-93be-4690-ad21-fb2bb6985496",
+      "name": "Generate Offsets",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig",
+          "mode": "list",
+          "cachedResultName": "Khách hàng Zalo OA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Thông tin khách hàng",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "shared_info": "={{(() => {\n  const s = $json.shared_info || {};\n  const parts = [];\n  if (s.address) parts.push(s.address);\n  if (s.district) parts.push(s.district);\n  if (s.city) parts.push(s.city);\n  if (s.phone && s.phone !== \"0\") parts.push(s.phone);\n  return parts.join(\", \");\n})()}}",
+            "User_id": "={{ $json.user_id }}",
+            "User_id_by_app": "={{ $json.user_id_by_app }}",
+            "User_name": "={{ $json.display_name }}",
+            "User_alias": "={{ $json.user_alias }}",
+            "Tag": "={{(() => {\n  const info = $json.tags_and_notes_info;\n  if (!info || !Array.isArray(info.tag_names)) return \"\";\n  return info.tag_names.filter(Boolean).join(\", \");\n})()}}",
+            "sensetive": "={{ $json.is_sensitive }}",
+            "follow": "={{ $json.user_is_follower }}",
+            "user_last_interaction_date": "={{ $json.user_last_interaction_date }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "User_id",
+              "displayName": "User_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "User_id_by_app",
+              "displayName": "User_id_by_app",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "User_name",
+              "displayName": "User_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "User_alias",
+              "displayName": "User_alias",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sensetive",
+              "displayName": "sensetive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow",
+              "displayName": "follow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "user_last_interaction_date",
+              "displayName": "user_last_interaction_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "shared_info",
+              "displayName": "shared_info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1920,
+        -528
+      ],
+      "id": "e75675d2-0ecc-42da-b062-1ae1f2a3cb10",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T4BIlZq3O0X4Tg2N",
+          "name": "Lamtuyen account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loại bỏ item null, error, hoặc không có user_id\nreturn items\n    .filter(item => {\n        const data = item.json?.data;\n        return data && data.user_id && !item.json?.error;\n    })\n    .map(item => ({\n        json: item.json.data  // chỉ trả về phần data, không trả về error hay wrapper\n    }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1744,
+        -528
+      ],
+      "id": "4c611e2c-81a9-464d-ad6d-b53ac0dbad8b",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": true,
+      "executeOnce": false
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get access_token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get access_token": {
+      "main": [
+        [
+          {
+            "node": "Get First Page (for total)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get First Page (for total)": {
+      "main": [
+        [
+          {
+            "node": "Generate Offsets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Offsets": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get Users Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Users Page": {
+      "main": [
+        [
+          {
+            "node": "Split Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Users": {
+      "main": [
+        [
+          {
+            "node": "Get User Detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Detail": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "End Loop": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Offsets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Offsets": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Offsets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "End Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "619adb97-6ab1-4fc3-8ba5-190a8ba1521e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df75f6d19da9532b87ea5a84541b4ccc1d0dd5baf896242962b0dfcbc492bcf4"
+  },
+  "id": "ekrErBBwwD818QPW",
+  "tags": []
+}

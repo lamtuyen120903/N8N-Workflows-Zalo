@@ -1,0 +1,852 @@
+{
+  "name": "Zalo - OA - Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "httpMethod": [
+          "POST"
+        ],
+        "path": "67db90d6-d72c-462a-87b4-5e8df6596430",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -112,
+        -192
+      ],
+      "id": "71244bdd-6370-41b9-844e-061571eff6b6",
+      "name": "Webhook",
+      "webhookId": "67db90d6-d72c-462a-87b4-5e8df6596430"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig",
+          "mode": "list",
+          "cachedResultName": "Khách hàng Zalo OA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Thông tin khách hàng",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "User_id_OA",
+              "lookupValue": "={{ $('Switch').item.json.body.follower.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        544,
+        -96
+      ],
+      "id": "45970a57-9079-4fb0-b809-248a1deb20c8",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T4BIlZq3O0X4Tg2N",
+          "name": "Lamtuyen account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.event_name }}",
+                    "rightValue": "unfollow",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "23d753ac-7190-4573-bcf8-fb181a9b55ab"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "unfollow"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "9596b48f-a864-4c05-8d02-c5fecf586e42",
+                    "leftValue": "={{ $json.body.event_name }}",
+                    "rightValue": "follow",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "follow"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1542eb42-b80f-48da-ad29-b9d8ebd552b4",
+                    "leftValue": "={{ $json.body.message }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Nhắn tin"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        112,
+        -208
+      ],
+      "id": "74532f66-e29f-4dcb-8c4f-3ace076d08cf",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bee7dfed-1d2e-4d30-bdc8-c82c00f076e5",
+              "leftValue": "={{ $('Get row(s) in sheet').item.json.row_number }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -80
+      ],
+      "id": "e598a321-0e88-426d-8481-5776706f7552",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig",
+          "mode": "list",
+          "cachedResultName": "Khách hàng Zalo OA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Thông tin khách hàng",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "User_id": "={{ $json.data.user_id }}",
+            "User_id_by_app": "={{ $json.data.user_id_by_app }}",
+            "User_name": "={{ $json.data.display_name }}",
+            "User_alias": "={{ $json.data.user_alias }}",
+            "sensetive": "={{ $json.data.is_sensitive }}",
+            "follow": "={{ $json.data.user_is_follower }}",
+            "user_last_interaction_date": "={{ $json.data.user_last_interaction_date }}",
+            "Tag": "={{ $json.data.tags_and_notes_info.tag_names.join(',') }}",
+            "shared_info": "={{(() => {   const s = $json.shared_info || {};   const parts = [];   if (s.address) parts.push(s.address);   if (s.district) parts.push(s.district);   if (s.city) parts.push(s.city);   if (s.phone && s.phone !== \"0\") parts.push(s.phone);   return parts.join(\", \"); })()}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "User_id",
+              "displayName": "User_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "User_id_by_app",
+              "displayName": "User_id_by_app",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "User_name",
+              "displayName": "User_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "User_alias",
+              "displayName": "User_alias",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow",
+              "displayName": "follow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sensetive",
+              "displayName": "sensetive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "user_last_interaction_date",
+              "displayName": "user_last_interaction_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "shared_info",
+              "displayName": "shared_info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        -192
+      ],
+      "id": "6b82c962-736d-4059-afe7-b34034ac01f0",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T4BIlZq3O0X4Tg2N",
+          "name": "Lamtuyen account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig",
+          "mode": "list",
+          "cachedResultName": "Khách hàng Zalo OA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Thông tin khách hàng",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "User_id": "={{ $json.body.follower.id }}",
+            "follow": "=FALSE"
+          },
+          "matchingColumns": [
+            "User_id"
+          ],
+          "schema": [
+            {
+              "id": "User_id",
+              "displayName": "User_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "User_id_by_app",
+              "displayName": "User_id_by_app",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "User_name",
+              "displayName": "User_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "User_alias",
+              "displayName": "User_alias",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sensetive",
+              "displayName": "sensetive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "follow",
+              "displayName": "follow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "user_last_interaction_date",
+              "displayName": "user_last_interaction_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "shared_info",
+              "displayName": "shared_info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        336,
+        -288
+      ],
+      "id": "9b839edf-c6e5-4679-ad8b-7f981424b6d5",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T4BIlZq3O0X4Tg2N",
+          "name": "Lamtuyen account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "6pSZ9sHqsg8AvCLt",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/6pSZ9sHqsg8AvCLt",
+          "cachedResultName": "Zalo - OA -  Gửi tin nhắn"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {}
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        464,
+        128
+      ],
+      "id": "c275efe0-9896-465d-bc26-5015f5744fc4",
+      "name": "Call 'Zalo - OA -  Gửi tin nhắn'"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "WZTalOMZazEDVaD4",
+          "mode": "list",
+          "cachedResultName": "Zalo - Access",
+          "cachedResultUrl": "/projects/yBT9VjklbcIIfxSf/datatables/WZTalOMZazEDVaD4"
+        },
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -96
+      ],
+      "id": "66d6c988-55c3-44cd-ade9-a4b722da4ec4",
+      "name": "Get access_token1"
+    },
+    {
+      "parameters": {
+        "url": "https://openapi.zalo.me/v3.0/oa/user/detail",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={\"user_id\":\"{{ $('Webhook').item.json.body.follower.id }}\"}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Get access_token1').item.json.access_token }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        736,
+        -96
+      ],
+      "id": "8b0cc55a-7e0e-4c4b-96f1-ec97a2bb60b9",
+      "name": "Get User Detail2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig",
+          "mode": "list",
+          "cachedResultName": "Khách hàng Zalo OA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Thông tin khách hàng",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x0L4NbXOnBIngHoNp-AqbEQBZbQ2v8fQ8XvEsdOy3Ig/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "follow": "=TRUE",
+            "Tag": "={{ $json.data.tags_and_notes_info.tag_names.join(',') }}",
+            "User_id_OA": "={{ $('Webhook').item.json.body.follower.id }}",
+            "User_id_by_app": "={{ $('Webhook').item.json.body.oa_id }}"
+          },
+          "matchingColumns": [
+            "User_id"
+          ],
+          "schema": [
+            {
+              "id": "User_id_OA",
+              "displayName": "User_id_OA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "User_id_by_app",
+              "displayName": "User_id_by_app",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "User_id_CNV",
+              "displayName": "User_id_CNV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "User_name",
+              "displayName": "User_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "User_alias",
+              "displayName": "User_alias",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "follow",
+              "displayName": "follow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sensetive",
+              "displayName": "sensetive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "user_last_interaction_date",
+              "displayName": "user_last_interaction_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SDT",
+              "displayName": "SDT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tỉnh thành",
+              "displayName": "Tỉnh thành",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        48
+      ],
+      "id": "7a1c2f18-9455-4c05-b2eb-a28009571480",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T4BIlZq3O0X4Tg2N",
+          "name": "Lamtuyen account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.otimo.vn",
+            "x-real-ip": "49.213.78.6",
+            "x-forwarded-for": "49.213.78.6",
+            "x-forwarded-proto": "https",
+            "connection": "Upgrade",
+            "content-length": "171",
+            "content-type": "application/json",
+            "user-agent": "ZaloWebhook",
+            "x-zevent-server": "OA OpenAPI",
+            "x-zevent-signature": "mac=a40e0f052ac516aa2007c48561bae689423fac372db716365b30baca74e91957"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "oa_id": "874534891260076964",
+            "follower": {
+              "id": "399055821688499749"
+            },
+            "event_name": "follow",
+            "source": "oa_profile",
+            "app_id": "964576516721822117",
+            "timestamp": "1764657089024"
+          },
+          "webhookUrl": "https://n8n.otimo.vn/webhook/67db90d6-d72c-462a-87b4-5e8df6596430",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get access_token1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Get User Detail2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get access_token1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Detail2": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8889b06c-1bea-49b2-97cc-ad0e9bc30d48",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df75f6d19da9532b87ea5a84541b4ccc1d0dd5baf896242962b0dfcbc492bcf4"
+  },
+  "id": "RNoCwDpBu5eKYM8m",
+  "tags": []
+}

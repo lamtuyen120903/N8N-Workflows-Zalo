@@ -1,0 +1,425 @@
+{
+  "name": "Zalo - Tự Động Add & Accept Bạn Bè",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "acceptFriendRequest",
+        "userId": "={{ $('Zalo Event Trigger by diginno.net').item.json.data.data.fromUid }}"
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloUser",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        224
+      ],
+      "id": "4a213423-67bc-429f-981b-4635eeaa9769",
+      "name": "Chấp nhận lời mời kết bạn",
+      "credentials": {
+        "zaloApi": {
+          "id": "ZNGzItbJ2er3g4Pv",
+          "name": "Lam Tuyền 05-11-2025 14:55"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "eventTypes": [
+          "message",
+          "friend_event",
+          "group_event"
+        ]
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloMessageTrigger",
+      "typeVersion": 2,
+      "position": [
+        -1296,
+        80
+      ],
+      "id": "67a9a51a-77d7-4147-b9de-cea4ff8651ea",
+      "name": "Zalo Event Trigger by diginno.net",
+      "webhookId": "1f83fb79-0b0e-409d-9d2a-547186a2bf1f",
+      "credentials": {
+        "zaloApi": {
+          "id": "ZNGzItbJ2er3g4Pv",
+          "name": "Lam Tuyền 05-11-2025 14:55"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "threadId": "={{ $('Zalo Event Trigger by diginno.net').item.json.data.data.fromUid }}",
+        "message": "={{ $json.output }}"
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloSendMessage",
+      "typeVersion": 5,
+      "position": [
+        -48,
+        224
+      ],
+      "id": "858cfe64-95ac-4ae0-9af2-4d62c18b89a0",
+      "name": "Zalo Gửi tin nhắn by diginno.net",
+      "credentials": {
+        "zaloApi": {
+          "id": "ZNGzItbJ2er3g4Pv",
+          "name": "Lam Tuyền 05-11-2025 14:55"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getFriendRequestStatus",
+        "userId": "={{ $json.data.data.uidFrom }}"
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloUser",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        -64
+      ],
+      "id": "ce5a38f6-51b2-4bf8-a6d8-7ae3ab010231",
+      "name": "Kiểm tra trạng thái kết bạn",
+      "credentials": {
+        "zaloApi": {
+          "id": "ZNGzItbJ2er3g4Pv",
+          "name": "Lam Tuyền 05-11-2025 14:55"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.userInfo.changed_profiles['5714075628584953363'].isFr }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "d61f6b2f-2476-43ab-915b-16971809f1c0"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Chưa kết bạn"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ec117117-ee91-4b37-8d5c-d41fecf2ee80",
+                    "leftValue": "={{ $json.userInfo.changed_profiles['5714075628584953363'].isFr }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Đã là bạn bè"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -432,
+        -64
+      ],
+      "id": "ef8b4e8e-c72d-44ea-bf8f-e6695803f6d1",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Zalo Event Trigger by diginno.net').item.json.data.data.uidFrom }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "7f84bc53-60a7-4e43-bd77-f1f50c56bc66"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Người dùng nhắn tin"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "85e97e31-6613-479c-a326-b154cffb7bf7",
+                    "leftValue": "={{ $('Zalo Event Trigger by diginno.net').item.json.data.data.fromUid }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Người dùng kết bạn"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -848,
+        80
+      ],
+      "id": "c82314e6-ab8e-47d9-8168-5e4d137e3929",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "operation": "sendFriendRequest",
+        "userId": "={{ $json.data.data.uidFrom }}",
+        "message": "Cẩm Nang Gối Lò xin chào! Hãy kết bạn để có thể hỏi thêm thông tin về làm bánh nhé."
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloUser",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        -80
+      ],
+      "id": "a2b3297e-4d5e-4176-8d5d-e6cfe2cc54ce",
+      "name": "Gửi lời mời kết bạn",
+      "credentials": {
+        "zaloApi": {
+          "id": "ZNGzItbJ2er3g4Pv",
+          "name": "Lam Tuyền 05-11-2025 14:55"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=",
+        "options": {
+          "systemMessage": "=Bạn là **Cẩm Nang Gối Lò** – trợ lý thân thiện và chuyên nghiệp của fanpage Cẩm Nang Gối Lò, là nơi chỉ chia sẽ các kiến thức về ngành bánh.\n\n**Nguyên tắc giao tiếp bắt buộc:**\n\n1. **Luôn bắt đầu bằng lời chào lịch sự, ngắn gọn, không thêm câu hỏi kiểu “Hôm nay bạn muốn trò chuyện gì?”**  \n   → Sử dụng biến cá nhân hóa:  \n   ```\n   Chào {{ $('Lấy thông tin người dùng').item.json.changed_profiles[\"5714075628584953363\"]?.gender == 0 ? \"anh\" : ($('Lấy thông tin người dùng').item.json.changed_profiles[\"5714075628584953363\"]?.gender == 1 ? \"chị\" : \"bạn\") }} {{ $('Lấy thông tin người dùng').item.json.changed_profiles['5714075628584953363'].zaloName }}!\n   ```\n2. **Luôn xưng hô là “Cẩm Nang Gối Lò”** (không dùng tôi, mình, em, chị...).\n\n3. **Mục tiêu chính: Điều hướng người dùng tham gia 2 group để nhận tài liệu miễn phí và tham gia nhóm chia sẽ kiến thức ngành bánh**  \n→ Hai group:  \n\n- **Tài Liệu Ngành Bánh** – https://zalo.me/g/ujerqq444  \n- **Chia Sẻ Kiến Thức Làm Bánh Trung Thu** – https://zalo.me/g/szigxh684\n\n→ Cả 2 group đều cung cấp sách, tài liệu miễn phí về ngành bánh\n\n4. **Cách điều hướng tự nhiên, khéo léo, chuyên nghiệp:**  \n- Sau khi chào → nhận diện nhu cầu (nếu có) → giới thiệu **giá trị chung của cộng đồng làm bánh** → mời tham gia **cả 2 group** như cửa ngõ để tiếp cận kiến thức toàn diện.  \n- **Không ép buộc**, nhưng **nhấn mạnh lợi ích rõ ràng**: tài liệu đa dạng, công thức thực tế, hỏi đáp cùng chuyên gia & thành viên, cập nhật xu hướng làm bánh.  \n- Không giới hạn ở bánh Trung Thu – nhấn mạnh **làm bánh nói chung**.\n\n5. **Khi đặt câu hỏi → lịch sự, chuyên nghiệp, không cợt nhã, không đùa giỡn:**  \n→ Không được hỏi: \"Bạn lười làm bánh hả?\", \"Ủa chưa biết nướng luôn á?\"...\n\n6. **Giọng điệu tổng thể:**  \n   - Thân thiện ✓  \n   - Chuyên nghiệp ✓  \n   - Nhiệt tình ✓  \n   - Không dài dòng, không lan man.\n  - Dùng emoji cho các CTA\n  - Có câu CTA để hướng đến việc tham gia group\n  - Chỉ 1 câu hỏi liên quan đến nếu gạp vấn đề khó khăn liên hệ CNGL để đuọc giúp đõ\n - Luôn đưa ra link các nhóm\n\n**Không bao giờ được:**\n- Bỏ qua lời chào đầu tiên.\n- Dùng đại từ nhân xưng khác ngoài “Cẩm Nang Gối Lò”.\n- Điều hướng chỉ 1 group (phải mời cả 2).\n- Hứa hẹn tài liệu nếu không tham gia group.\n- Dùng ngôn ngữ teen.\n- Lặp lại link group nếu đã gửi."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        224
+      ],
+      "id": "11f8329c-8198-496e-8e41-53d5aa4b9fea",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "resource": "account",
+        "userId": "={{ $json.data.data.fromUid }}"
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloUser",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        80
+      ],
+      "id": "f10a2c80-62be-4cbe-9184-46db5c1da9d4",
+      "name": "Lấy thông tin người dùng",
+      "credentials": {
+        "zaloApi": {
+          "id": "ZNGzItbJ2er3g4Pv",
+          "name": "Lam Tuyền 05-11-2025 14:55"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        432
+      ],
+      "id": "f789f1e9-c368-4d05-a9a2-34d40305ff4b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zj6yLbnvVd30JHKi",
+          "name": "Google Gemini - Tân"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chấp nhận lời mời kết bạn": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zalo Event Trigger by diginno.net": {
+      "main": [
+        [
+          {
+            "node": "Lấy thông tin người dùng",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kiểm tra trạng thái kết bạn": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Gửi lời mời kết bạn",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Kiểm tra trạng thái kết bạn",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chấp nhận lời mời kết bạn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gửi lời mời kết bạn": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Zalo Gửi tin nhắn by diginno.net",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lấy thông tin người dùng": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e7b14e16-cdd8-4bd8-ad6e-9fb8df4adade",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df75f6d19da9532b87ea5a84541b4ccc1d0dd5baf896242962b0dfcbc492bcf4"
+  },
+  "id": "QkNV0QjSrEAHg7uN",
+  "tags": []
+}

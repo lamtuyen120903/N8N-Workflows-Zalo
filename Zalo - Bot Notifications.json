@@ -1,0 +1,253 @@
+{
+  "name": "Zalo - Bot Notifications",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        -192
+      ],
+      "id": "70554863-c0c9-4256-8907-0a58cb09d428",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bot-api.zapps.me/bot1373614001553898373:rYZxMjpkiUmAlakyeOiQeBHFFnXcfNvTanWDzrlpWCROciXiQSIzvnAYtaTPYXrT/getMe",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -48,
+        -192
+      ],
+      "id": "170777dd-c1b7-448f-9af8-74738edea8ee",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "zalo-bot-notification",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        144
+      ],
+      "id": "1e478ac2-d780-40ba-980e-a6da9307cff9",
+      "name": "Webhook",
+      "webhookId": "b1ea941b-bcb9-4d82-845d-68e343f76fdc"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bot-api.zapps.me/bot1373614001553898373:rYZxMjpkiUmAlakyeOiQeBHFFnXcfNvTanWDzrlpWCROciXiQSIzvnAYtaTPYXrT/setWebhook",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "https://n8n.otimo.vn/webhook/zalo-bot-notification"
+            },
+            {
+              "name": "secret_token",
+              "value": "zalo-otimo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        176,
+        -192
+      ],
+      "id": "ee4563f0-43a6-41be-be5f-486152cc6051",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bot-api.zapps.me/bot1373614001553898373:rYZxMjpkiUmAlakyeOiQeBHFFnXcfNvTanWDzrlpWCROciXiQSIzvnAYtaTPYXrT/sendMessage",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $('Webhook').item.json.body.message.from.id }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $('AI Agent').item.json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        528,
+        144
+      ],
+      "id": "8cebee93-5fb7-4004-8314-5240f461ba8f",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message.text }}",
+        "options": {
+          "systemMessage": "Bạn là OTIMO bot,\nLà cô chăm sóc khách hàng thân thiện"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -48,
+        144
+      ],
+      "id": "37f6699c-9b5f-46fd-aab6-04e292e3b840",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        32,
+        368
+      ],
+      "id": "bceb5558-5861-45e9-b974-f0628c4c32d8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zj6yLbnvVd30JHKi",
+          "name": "Google Gemini - Tân"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://bot-api.zapps.me/bot1373614001553898373:rYZxMjpkiUmAlakyeOiQeBHFFnXcfNvTanWDzrlpWCROciXiQSIzvnAYtaTPYXrT/sendChatAction",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $('Webhook').item.json.body.message.from.id }}"
+            },
+            {
+              "name": "action",
+              "value": "typing"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        304,
+        144
+      ],
+      "id": "80dbc217-239b-4c42-a608-d156ba5a8482",
+      "name": "HTTP Request3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "137d68c7-ddfd-4bc1-91c2-9233d18f638e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df75f6d19da9532b87ea5a84541b4ccc1d0dd5baf896242962b0dfcbc492bcf4"
+  },
+  "id": "RlsNuwEoRTRvPqwY",
+  "tags": []
+}

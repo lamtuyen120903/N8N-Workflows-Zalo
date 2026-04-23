@@ -1,0 +1,342 @@
+{
+  "name": "Zalo - Larkbase - Lấy Thông Tin Khách Hàng Từ Group CNGLTài Liệu",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://open.larksuite.com/open-apis/bitable/v1/apps/{{ $('Input').item.json.table_id }}/tables/{{ $('Input').item.json.sheet_id }}/records",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ignore_consistency_check",
+              "value": "true"
+            },
+            {
+              "name": "user_id_type",
+              "value": "open_id"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Get Lark Token').item.json.tenant_access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fields\": {\n  \"ID_User\": \"{{ $json.userId }}\",\n  \"Golbal_ID\": \"{{ $json.globalId }}\",\n  \"User_name\": \"{{ $json.zaloName }}\" \n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        192,
+        192
+      ],
+      "id": "60f7c9e7-cc32-4e27-8485-30c7a22295eb",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "resource": "account",
+        "userId": "={{ $json['response.gridInfoMap[\\'3805678902304196474\\'].memVerList'].replace(/_0/g, '') }}"
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloUser",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        192
+      ],
+      "id": "a9bcf3a3-60d6-446f-ad2c-9df536b68752",
+      "name": "Lấy thông tin người dùng",
+      "credentials": {
+        "zaloApi": {
+          "id": "ZNGzItbJ2er3g4Pv",
+          "name": "Lam Tuyền 05-11-2025 14:55"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "groupId": "3805678902304196474"
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloGroup",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        192
+      ],
+      "id": "acc60ba5-0a91-4a2a-8215-3fe2a306cad2",
+      "name": "Lấy thông tin nhóm",
+      "credentials": {
+        "zaloApi": {
+          "id": "ZNGzItbJ2er3g4Pv",
+          "name": "Lam Tuyền 05-11-2025 14:55"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "response.gridInfoMap['3805678902304196474'].memVerList",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        192
+      ],
+      "id": "4da0e804-7cf9-44c0-bf4f-59131aafa5b5",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "changed_profiles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        0,
+        192
+      ],
+      "id": "b8177d92-14c1-4dab-a88c-da3a535387e2",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy tất cả items từ input\nconst items = $input.all();\n\n// Chỉ lấy từ item thứ 358 đến 499 (index bắt đầu từ 0)\nconst startIndex = 0;  // item thứ 358\nconst endIndex = 100;    // item thứ 499 (inclusive)\n\nconst filteredItems = items.slice(startIndex, endIndex + 1);\n\n// Trả về các items đã lọc\nreturn filteredItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        192
+      ],
+      "id": "f059fa70-15b4-4bee-9a40-34be71a096a4",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        192
+      ],
+      "id": "596d1b79-1c32-4d84-8243-7f8d31228423",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"app_id\": \"{{ $json.app_id }}\",\n  \"app_secret\": \"{{ $json.app_secret }}\"\n} ",
+        "options": {}
+      },
+      "id": "d78c60e7-40ff-40ae-9edf-7bb5ec77489b",
+      "name": "Get Lark Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -864,
+        192
+      ],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "322bfa44-ee2a-4ddf-b747-0f7f3405e294",
+              "name": "app_id",
+              "type": "string",
+              "value": "cli_a8746eb09c395ed4"
+            },
+            {
+              "id": "c8faab22-235b-412c-8dc8-8142c6e2e0c4",
+              "name": "app_secret",
+              "type": "string",
+              "value": "WDEE2VY5mp373Q3Xc3AEJhVW4FKdxX8Y"
+            },
+            {
+              "id": "fa824f0c-c1ff-4e7f-af2e-e702cdd7a2e1",
+              "name": "table_id",
+              "value": "VVfFbUMNlalM81shqKcldt4IgBb",
+              "type": "string"
+            },
+            {
+              "id": "1630805e-0e9d-4b40-aee9-7da76a449452",
+              "name": "sheet_id",
+              "value": "tblKVJyN8G47Z8qc",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "867ba136-c31d-4cea-990d-1ebf040f27f6",
+      "name": "Input",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1040,
+        192
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## Chỉ lấy đc tối da khoảng 180 người / ngày",
+        "height": 240,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        80
+      ],
+      "id": "5aa0faa7-baea-43ce-beb3-70d72ed64902",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Chỉ lưu đc khoảng 50/lần",
+        "height": 176,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        144,
+        112
+      ],
+      "id": "b87304a8-bdb0-435d-a609-f6699c7d7dbc",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lấy thông tin người dùng": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lấy thông tin nhóm": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Lấy thông tin người dùng",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Lark Token": {
+      "main": [
+        [
+          {
+            "node": "Lấy thông tin nhóm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input": {
+      "main": [
+        [
+          {
+            "node": "Get Lark Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d6759282-bb4e-48f5-b6d9-6a418414cde5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df75f6d19da9532b87ea5a84541b4ccc1d0dd5baf896242962b0dfcbc492bcf4"
+  },
+  "id": "xHwjVHbnj0xrr0Mu",
+  "tags": []
+}

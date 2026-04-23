@@ -1,0 +1,790 @@
+{
+  "name": "Zalo - Gửi Tin Nhắn Tự Động Cho Group CNGL Tài Liệu",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 12,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1232,
+        784
+      ],
+      "id": "8745555a-c753-4763-b7bc-77ac8d0d613b",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "keep": "lastItems"
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        784
+      ],
+      "id": "3b6048df-26a1-4979-91fe-b510b20c83a1",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1gVSCss5uZ-GN0ZO_ZiU950rTXy0tmEf6T5ASGHd5354",
+          "mode": "list",
+          "cachedResultName": "TỔNG HỢP BÀI VIẾT TRÊN FANPAGE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gVSCss5uZ-GN0ZO_ZiU950rTXy0tmEf6T5ASGHd5354/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Cẩm Nang Gối Lò",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gVSCss5uZ-GN0ZO_ZiU950rTXy0tmEf6T5ASGHd5354/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1008,
+        784
+      ],
+      "id": "c15583e8-9289-4f7b-9640-30697db5ba50",
+      "name": "Lấy bài viết",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T4BIlZq3O0X4Tg2N",
+          "name": "Lamtuyen account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json['Link hình ảnh'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -336,
+        784
+      ],
+      "id": "7d9479d4-89b0-41f1-8eb2-b0025ec822df",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy đoạn văn đầu vào\nconst inputText = `${$('If').first().json.Title}\n\n${$('If').first().json.Description}`;;\n\n// Hàm tách văn bản tại dòng gần nhất sau từ thứ wordLimit\nfunction splitTextAtNewlineAfterWordCount(text, wordLimit) {\n  let wordCount = 0;\n  let cutIndex = 0;\n  let inWord = false;\n  let lastWordEnd = 0;\n\n  // Duyệt qua từng ký tự để đếm từ\n  for (let i = 0; i < text.length; i++) {\n    const isSpace = text[i] === \" \";\n    const isNewline = text[i] === \"\\n\";\n\n    if (!inWord && !isSpace && !isNewline) {\n      // Bắt đầu một từ mới\n      inWord = true;\n      wordCount++;\n    } else if (inWord && (isSpace || isNewline)) {\n      // Kết thúc một từ\n      inWord = false;\n      lastWordEnd = i; // Lưu vị trí kết thúc từ\n    }\n\n    // Nếu đã đạt đến từ thứ wordLimit, tìm xuống dòng gần nhất\n    if (wordCount >= wordLimit && !inWord) {\n      if (isNewline) {\n        cutIndex = i + 1; // Cắt ngay sau ký tự xuống dòng\n        break;\n      }\n    }\n  }\n\n  // Nếu không tìm thấy xuống dòng hoặc không đủ từ\n  if (cutIndex === 0) {\n    // Nếu có ít hơn wordLimit từ, trả về toàn bộ chuỗi\n    if (wordCount < wordLimit) {\n      return { firstPart: text, remainingPart: \"\" };\n    }\n    // Nếu không có xuống dòng sau từ thứ wordLimit, cắt tại từ thứ wordLimit\n    cutIndex = lastWordEnd;\n  }\n\n  // Cắt chuỗi thành hai phần\n  const firstPart = text.substring(0, cutIndex);\n  const remainingPart = text.substring(cutIndex);\n\n  return { firstPart, remainingPart };\n}\n\n// Gọi hàm để tách văn bản tại dòng gần nhất sau từ thứ 480\nconst result = splitTextAtNewlineAfterWordCount(inputText, 480);\n\n// Trả về kết quả\nreturn [\n  {\n    json: {\n      firstPart: result.firstPart || \"\",\n      remainingPart: result.remainingPart || \"\"\n    }\n  }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        784
+      ],
+      "id": "08589f14-6ead-4c58-ae82-69fb8d924b2f",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3d5abbdf-8cd4-4119-a418-736fcc6d574e",
+              "leftValue": "={{ $json['Trạng thái đăng Zalo'] }}",
+              "rightValue": "Đã đăng",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -560,
+        784
+      ],
+      "id": "2b493cdc-e50f-4b20-93e3-95dd81bb8383",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1gVSCss5uZ-GN0ZO_ZiU950rTXy0tmEf6T5ASGHd5354",
+          "mode": "list",
+          "cachedResultName": "TỔNG HỢP BÀI VIẾT TRÊN FANPAGE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gVSCss5uZ-GN0ZO_ZiU950rTXy0tmEf6T5ASGHd5354/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Cẩm Nang Gối Lò",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gVSCss5uZ-GN0ZO_ZiU950rTXy0tmEf6T5ASGHd5354/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('If').item.json.ID }}",
+            "Trạng thái đăng Zalo": "Đã đăng"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Link bài viết",
+              "displayName": "Link bài viết",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Link hình ảnh",
+              "displayName": "Link hình ảnh",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Created_time",
+              "displayName": "Created_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Danh mục",
+              "displayName": "Danh mục",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Page",
+              "displayName": "Page",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Trạng thái",
+              "displayName": "Trạng thái",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Trạng thái đăng Zalo",
+              "displayName": "Trạng thái đăng Zalo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Link sau khi publish",
+              "displayName": "Link sau khi publish",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        784
+      ],
+      "id": "24cb8ca9-4a2c-47cc-b65a-18b9ebe79813",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T4BIlZq3O0X4Tg2N",
+          "name": "Lamtuyen account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Lấy thông tin bài viết mới nhất ",
+        "height": 256,
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        688
+      ],
+      "id": "865afa69-b824-46a4-aa64-3b961a8b0672",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Mỗi ngày vào 12:30",
+        "height": 256,
+        "width": 192,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1280,
+        688
+      ],
+      "id": "d2fcddc9-d34a-49ec-92c7-b618d67b175e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Lọc thông tin bài đã được đăng để tránh bị  trùng\n** Dành cho các ngày thứ 7,cn\n",
+        "height": 272,
+        "width": 320,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        672
+      ],
+      "id": "ec6d6e64-835d-429a-adf6-79817b2d9356",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Download hình ảnh - Write hình ảnh vào disk\n",
+        "height": 272,
+        "width": 416,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        672
+      ],
+      "id": "d2ed01af-5528-4a71-9de9-40b04689e278",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Định dạng text",
+        "height": 272,
+        "width": 208,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        64,
+        672
+      ],
+      "id": "304e5541-df0f-455e-a46c-5396ff8aa5a4",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## 1. Gửi Text - đính kèm hình ảnh 2. Chỉ Text\n ",
+        "height": 704,
+        "width": 208,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        288,
+        528
+      ],
+      "id": "17589f76-59a6-4854-a004-15275579650e",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Cập nhật trạng thái đã đăng\n\n ",
+        "height": 224,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        720
+      ],
+      "id": "1b029198-c4a9-4797-bda6-672e12936dff",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "threadId": "=4704866323941501409",
+        "type": 1,
+        "message": "={{ $('Code in JavaScript1').first().json.firstPart }}",
+        "attachments": {
+          "attachment": [
+            {
+              "type": "localPath",
+              "filePath": "={{ $('Read/Write Files from Disk').item.json.fileName }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloSendMessage",
+      "typeVersion": 5,
+      "position": [
+        336,
+        960
+      ],
+      "id": "b994a9a0-5614-4419-acf6-1b13519fd4c4",
+      "name": "trung thu",
+      "credentials": {
+        "zaloApi": {
+          "id": "mXoK7M2HcHdA8Fk5",
+          "name": "Lam Tuyền 12-12-2025 12:54"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "threadId": "=4704866323941501409",
+        "type": 1,
+        "message": "={{ $('Code in JavaScript1').first().json.remainingPart }}"
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloSendMessage",
+      "typeVersion": 5,
+      "position": [
+        336,
+        1104
+      ],
+      "id": "114ee8c1-9f1b-4044-9e6b-7783839e1037",
+      "name": "trung thu1",
+      "credentials": {
+        "zaloApi": {
+          "id": "mXoK7M2HcHdA8Fk5",
+          "name": "Lam Tuyền 12-12-2025 12:54"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "threadId": "=3805678902304196474",
+        "type": 1,
+        "message": "={{ $('Code in JavaScript1').first().json.firstPart }}",
+        "attachments": {
+          "attachment": [
+            {
+              "type": "localPath",
+              "filePath": "={{ $('Read/Write Files from Disk').item.json.fileName }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloSendMessage",
+      "typeVersion": 5,
+      "position": [
+        336,
+        656
+      ],
+      "id": "b99eab39-f620-4151-9c01-80dd360b123c",
+      "name": "tài liệu",
+      "credentials": {
+        "zaloApi": {
+          "id": "mXoK7M2HcHdA8Fk5",
+          "name": "Lam Tuyền 12-12-2025 12:54"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "threadId": "3805678902304196474",
+        "type": 1,
+        "message": "={{ $('Code in JavaScript1').first().json.remainingPart }}"
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloSendMessage",
+      "typeVersion": 5,
+      "position": [
+        336,
+        816
+      ],
+      "id": "e3453fcc-1848-42f1-bd64-7adfdf315d9b",
+      "name": "tài liệu1",
+      "retryOnFail": false,
+      "credentials": {
+        "zaloApi": {
+          "id": "mXoK7M2HcHdA8Fk5",
+          "name": "Lam Tuyền 12-12-2025 12:54"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-zalo-nnt.zaloLoginByQr",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        992
+      ],
+      "id": "e8e13b37-db2a-4f86-b761-ce8287ecde60",
+      "name": "Zalo Đăng nhập QR by diginno.net",
+      "credentials": {
+        "n8nApiZaloApi": {
+          "id": "FuDMiFvG3yGpaalJ",
+          "name": "n8n Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://scontent.fsgn5-8.fna.fbcdn.net/v/t39.30808-6/608315049_898577042519317_6604813286235554535_n.jpg?stp=cp0_dst-jpg_e48_fr_q65_tt6&_nc_cat=109&ccb=1-7&_nc_sid=e5c1b6&_nc_ohc=rR0D64X5uooQ7kNvwE4V4Cb&_nc_oc=AdmDEA_njhH1CUD02hkHkMpXRdPZ-nluf9uGkMV_FHr30898a3mQ05kOOvJWY6lxDC0&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.fsgn5-8.fna&oh=00_AfqPwCYdA-d95niMnFnXi0rUcKqw8Pyn9QCkqqQloDdX4w&oe=695D2856",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1120,
+        1216
+      ],
+      "id": "a4061307-61dd-4984-b47a-89f20516a064",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        1216
+      ],
+      "id": "c40ecbd9-ed96-4f1d-85f3-10b3ceb4b5f1",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/files/{{ $binary.data.fileName }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -112,
+        784
+      ],
+      "id": "b7900896-68bd-41bc-865a-debc6be26b68",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "threadId": "=5913254047887876538",
+        "type": 1,
+        "message": "=tesst",
+        "attachments": {
+          "attachment": [
+            {
+              "type": "localPath",
+              "filePath": "=/files/{{ $binary.data.fileName }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-zalo-nnt.zaloSendMessage",
+      "typeVersion": 5,
+      "position": [
+        -896,
+        1216
+      ],
+      "id": "153159e6-3e2c-4184-bdae-3ae1e5a1a7f4",
+      "name": "tài liệu2",
+      "credentials": {
+        "zaloApi": {
+          "id": "mXoK7M2HcHdA8Fk5",
+          "name": "Lam Tuyền 12-12-2025 12:54"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-12-19T12:30:47.018+07:00",
+          "Readable date": "December 19th 2025, 12:30:47 pm",
+          "Readable time": "12:30:47 pm",
+          "Day of week": "Friday",
+          "Year": "2025",
+          "Month": "December",
+          "Day of month": "19",
+          "Hour": "12",
+          "Minute": "30",
+          "Second": "47",
+          "Timezone": "Asia/Ho_Chi_Minh (UTC+07:00)"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Lấy bài viết",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lấy bài viết": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "tài liệu",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "tài liệu1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "trung thu",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "trung thu1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "trung thu": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "trung thu1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tài liệu": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tài liệu1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "tài liệu2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d11ade0b-3541-4eba-ad83-243a97f2fe53",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df75f6d19da9532b87ea5a84541b4ccc1d0dd5baf896242962b0dfcbc492bcf4"
+  },
+  "id": "6SYUFyF8pCiO4ebB",
+  "tags": []
+}
