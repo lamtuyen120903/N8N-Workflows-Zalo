@@ -202,6 +202,7 @@ Update row in sheet (đánh dấu "Đã đăng")
 ```
 
 **Điều kiện active:** ✅ Đang bật
+<img width="1027" height="716" alt="Screenshot 2026-04-23 at 14 34 22" src="https://github.com/user-attachments/assets/d56f6597-77eb-42ca-8652-bb4d5fec2ed9" />
 
 ---
 
